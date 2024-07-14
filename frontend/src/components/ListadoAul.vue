@@ -1,33 +1,18 @@
 <template>
-  <div class="aula-container">
-    <div class="button-container">
-      <v-btn
-        color="primary"
-        @click="navigateToAbmAula"
-        class="custom-button mr-4"
-      >
-        <v-icon left>mdi-school</v-icon>
-        Agregar Aula
-      </v-btn>
-      <v-btn
-        color="blue" 
-        @click="navigateToHome"
-        class="custom-button"
-      >
-        <v-icon left>mdi-home</v-icon>
-        Volver a Home
-      </v-btn>
+  <div>
+    <div>
+      <v-btn color="primary" @click="navigateToAbmAula">Agregar Aula</v-btn>
     </div>
 
     <v-data-table
       :headers="headers"
       :items="listadoAula"
-      height="400"
+      height="500"
       item-value="name"
     >
       <template v-slot:item.actions="{ item }">
-        <v-icon color="green" @click="editarAula(item)" class="mr-2">mdi-pencil</v-icon>
-        <v-icon color="red" @click="confirmarEliminarAula(item)" class="ml-2">mdi-delete</v-icon>
+        <v-icon @click="editarAula(item)" class="mr-2">mdi-pencil</v-icon>
+        <v-icon @click="confirmarEliminarAula(item)" class="ml-2">mdi-delete</v-icon>
       </template>
     </v-data-table>
 
@@ -60,15 +45,16 @@ import AbmAula from './AbmAula.vue';
 
 export default {
   components: {
-    AbmAula,
+      AbmAula,
   },
   data() {
     return {
       headers: [
-        { text: 'Descripción', value: 'descripcion' },
-        { text: 'Ubicación', value: 'ubicacion' },
-        { text: 'Cant. Proyectores', value: 'cant_proyector' },
-        { text: 'Es Climatizada', value: 'es_climatizada' },
+        { text: 'Id', value: 'id' },
+        { text: 'Descripcion', value: 'descripcion' },
+        { text: 'Ubicacion', value: 'ubicacion' },
+        { text: 'Cant_proyectores', value: 'cant_proyector' },
+        { text: 'Es_climatizada', value: 'es_climatizada' },
         { text: 'Aforo', value: 'aforo' },
         { text: 'Acciones', value: 'actions', sortable: false },
       ],
@@ -86,10 +72,7 @@ export default {
         .get('/apiv1/aula')
         .then(response => {
           if (response.status === 200) {
-            this.listadoAula = response.data.map(aula => ({
-              ...aula,
-              es_climatizada: aula.es_climatizada ? 'Sí' : 'No'
-            }));
+            this.listadoAula = response.data;
           }
         })
         .catch(error => {
@@ -98,9 +81,6 @@ export default {
     },
     navigateToAbmAula() {
       this.$router.push('/abmaula');
-    },
-    navigateToHome() {
-      this.$router.push('/');
     },
     editarAula(item) {
       this.aulaSeleccionada = { ...item };
@@ -138,25 +118,13 @@ export default {
 };
 </script>
 
+
+
 <style scoped>
-.aula-container {
-  padding: 20px;
-}
-.button-container {
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: 20px;
-}
-.custom-button {
-  height: 48px !important;
-}
 .mr-2 {
   margin-right: 8px;
 }
 .ml-2 {
   margin-left: 8px;
 }
-.mr-4 {
-  margin-right: 16px;
-}
-</style>
+</style>./AbmAula1.vue/index.js./AbmAula2.vue/index.js

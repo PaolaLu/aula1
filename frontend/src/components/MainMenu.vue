@@ -13,7 +13,7 @@
       	</v-img>
       	<v-list-item-content>
         	<v-list-item-title class="text-h6"> Aulas Curza </v-list-item-title>
-        	<v-list-item-subtitle> FeI </v-list-item-subtitle>
+        	<v-list-item-subtitle> Final </v-list-item-subtitle>
       	</v-list-item-content>
     	</v-list-item>
     	<v-divider></v-divider>
@@ -44,6 +44,7 @@
 		{ title: "Profesores", icon: "mdi-view-dashboard" ,to: '/profesores' },
 		{ title: "ReservaAula", icon: "mdi-view-dashboard" ,to: '/reservaaula' },
 		{ title: "HorarioMateria", icon: "mdi-view-dashboard" ,to: '/horariomateria' },
+		{ title: "Materia", icon: "mdi-view-dashboard" ,to: '/materia' },
 	],
 
 	}),

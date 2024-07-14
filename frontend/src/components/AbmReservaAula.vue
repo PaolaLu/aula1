@@ -3,7 +3,6 @@
     <v-card>
       <v-card-title>{{ editar ? 'Editar Reserva de Aula' : 'Agregar Reserva de Aula' }}</v-card-title>
       <v-card-text>
-        <!-- Selección del Aula -->
         <v-select
           v-model="reservaData.id_aula"
           :items="aulas"
@@ -12,15 +11,12 @@
           label="Aula"
           :rules="aulaRules"
           required
-          :loading="aulasLoading"
-          :error-messages="aulasError ? [aulasError] : []"
         ></v-select>
-
-        <!-- Fecha de Inicio -->
+        
+        <!-- Fecha y Hora de Inicio -->
         <v-row>
-          <v-col cols="12">
+          <v-col cols="12" sm="6">
             <v-menu
-              ref="desdeMenu"
               v-model="menuDesde"
               :close-on-content-click="false"
               transition="scale-transition"
@@ -29,7 +25,7 @@
             >
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
-                  v-model="reservaData.fh_desde"
+                  v-model="fechaDesde"
                   label="Fecha de Inicio"
                   prepend-icon="mdi-calendar"
                   readonly
@@ -39,16 +35,27 @@
                   required
                 ></v-text-field>
               </template>
-              <v-date-picker v-model="reservaData.fh_desde" @input="menuDesde = false"></v-date-picker>
+              <v-date-picker v-model="fechaDesde" 
+              @input="menuDesde = false"></v-date-picker>
             </v-menu>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              v-model="horaDesde"
+              label="Hora de Inicio"
+              type="time"
+              prepend-icon="mdi-clock-outline"
+              :rules="horaRules"
+              required
+              @click="focusInput('horaDesde')"
+            ></v-text-field>
           </v-col>
         </v-row>
 
-        <!-- Fecha de Fin -->
+        <!-- Fecha y Hora de Fin -->
         <v-row>
-          <v-col cols="12">
+          <v-col cols="12" sm="6">
             <v-menu
-              ref="hastaMenu"
               v-model="menuHasta"
               :close-on-content-click="false"
               transition="scale-transition"
@@ -57,7 +64,7 @@
             >
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
-                  v-model="reservaData.fh_hasta"
+                  v-model="fechaHasta"
                   label="Fecha de Fin"
                   prepend-icon="mdi-calendar"
                   readonly
@@ -67,17 +74,27 @@
                   required
                 ></v-text-field>
               </template>
-              <v-date-picker v-model="reservaData.fh_hasta" @input="menuHasta = false"></v-date-picker>
+              <v-date-picker v-model="fechaHasta" @input="menuHasta = false"></v-date-picker>
             </v-menu>
           </v-col>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              v-model="horaHasta"
+              label="Hora de Fin"
+              type="time"
+              prepend-icon="mdi-clock-outline"
+              :rules="horaRules"
+              required
+              @click="focusInput('horaHasta')"
+            ></v-text-field>
+          </v-col>
         </v-row>
-
+  
         <!-- Observaciones -->
         <v-text-field
           v-model="reservaData.observacion"
           label="Observaciones"
           :rules="observacionRules"
-          required
         ></v-text-field>
       </v-card-text>
       <v-card-actions>
@@ -111,11 +128,16 @@ export default {
         fh_hasta: "",
         observacion: "",
       },
+      fechaDesde: "",
+      horaDesde: "",
+      fechaHasta: "",
+      horaHasta: "",
       aulas: [],
       aulaRules: [(v) => !!v || 'El aula es requerida'],
       fechaDesdeRules: [(v) => !!v || 'La fecha de inicio es requerida'],
       fechaHastaRules: [(v) => !!v || 'La fecha de fin es requerida'],
-      observacionRules: [(v) => !!v || 'Las observaciones son requeridas'],
+      horaRules: [(v) => !!v || 'La hora es requerida'],
+      observacionRules: [],
       menuDesde: false,
       menuHasta: false,
       aulasLoading: false,
@@ -126,18 +148,43 @@ export default {
     reserva: {
       handler(nuevoValor) {
         this.reservaData = { ...nuevoValor };
+        if (this.reservaData.fh_desde) {
+          const desde = new Date(this.reservaData.fh_desde);
+          this.fechaDesde = this.formatDate(desde);
+          this.horaDesde = this.formatTime(desde);
+        }
+        if (this.reservaData.fh_hasta) {
+          const hasta = new Date(this.reservaData.fh_hasta);
+          this.fechaHasta = this.formatDate(hasta);
+          this.horaHasta = this.formatTime(hasta);
+        }
         if (!this.editar) {
           this.resetValidation();
         }
       },
       deep: true,
-    },
+      immediate: true,
+    }
   },
   methods: {
+    formatDate(date) {
+      if (!date) return null;
+      const d = new Date(date);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    },
+    formatTime(date) {
+      if (!date) return null;
+      const d = new Date(date);
+      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    },
+    updateDateTime() {
+      this.reservaData.fh_desde = `${this.fechaDesde}T${this.horaDesde}:00`;
+      this.reservaData.fh_hasta = `${this.fechaHasta}T${this.horaHasta}:00`;
+    },
     submit() {
-      // Validar el formulario antes de enviar
       this.$refs.form.validate();
       if (this.valid) {
+        this.updateDateTime();
         if (this.editar) {
           this.editarReserva();
         } else {
@@ -192,6 +239,13 @@ export default {
           this.aulasLoading = false;
         });
     },
+    focusInput(ref) {
+      this.$nextTick(() => {
+        if (this.$refs[ref]) {
+          this.$refs[ref].focus();
+        }
+      });
+    }
   },
   created() {
     this.obtenerAulas();
